@@ -8,9 +8,9 @@ import time
 
 #Variables
 minTransits = 3
-source = "Kuala Lumpur"
-dest= "Johor Bahru"
-cities = { "Alor Setar", "Malacca", "Kota Bahru", "Seremban", "Kuantan", "Ipoh", "Kangar", "Shah Alam", "Kuala Terrengganu", "Johor Bahru","Kota Kinabalu","Kuching","Kuala Lumpur"}
+source = "Tokyo"
+dest= "Dubai"
+cities = { "Beijing","Dubai","Los Angeles","Tokyo","London","Hong Kong","Amsterdam","Incheon","Istanbul","Singapore","Argentina","Delhi","Madrid"}
 
 API_KEY = "AIzaSyAn27el7Uuj1qLQvpZgF9fbVjGLu_HPhbQ"
 # Google Cloud API Key
