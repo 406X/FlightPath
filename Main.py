@@ -8,9 +8,9 @@ import time
 
 #Variables
 minTransits = 3
-source = "Tokyo"
+source = "Kuala Lumpur"
 dest= "Dubai"
-cities = { "Beijing","Dubai","Los Angeles","Tokyo","London","Hong Kong","Amsterdam","Incheon","Istanbul","Singapore","Argentina","Delhi","Madrid"}
+cities = { "Beijing","Dubai","Los Angeles","Tokyo","London","Hong Kong","Amsterdam","Incheon","Istanbul","Singapore","Argentina","Delhi","Madrid","Kuala Lumpur"}
 
 API_KEY = "AIzaSyAn27el7Uuj1qLQvpZgF9fbVjGLu_HPhbQ"
 # Google Cloud API Key
