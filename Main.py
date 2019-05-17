@@ -5,7 +5,6 @@ import RouteV3 as RT
 from mako.template import Template
 import time
 
-
 #Variables
 minTransits = 3
 source = "Kuala Lumpur"
@@ -19,11 +18,6 @@ API_KEY = "AIzaSyAn27el7Uuj1qLQvpZgF9fbVjGLu_HPhbQ"
 # - Geocoding API
 # - Maps JavaScript API
 
-#Init
-RT.cities = cities
-RT.dest = dest
-RT.minTransits = minTransits
-lc.API_KEY = API_KEY
 
 def showRoute(route):
 
@@ -71,7 +65,7 @@ def start():
     dest = input("Input: ")
     list.remove(dest)
     num = input("Number of transits to make (1-5) : ")
-    RT.minTransits = int(num)
+    minTransits = int(num)
 
 
 print("Generating route...")
@@ -79,6 +73,13 @@ print("Generating route...")
 #start()
 
 startTime = time.time()
+
+#Init
+RT.cities = cities
+RT.dest = dest
+RT.minTransits = minTransits
+lc.API_KEY = API_KEY
+
 route = RT.getRoute_v2(source,dest)
 print("Transits: " +str(route))
 
