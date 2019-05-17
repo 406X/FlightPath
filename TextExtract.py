@@ -15,8 +15,7 @@ for script in Text(["script", "style"]):
     script.decompose()
 
 for x in Text.stripped_strings:
-    if(x!=" "):
-        print(x)
+    print(x)
 
 
 
