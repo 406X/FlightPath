@@ -12,7 +12,7 @@ minTransits = 0
 dest = ""
 bestcost = -1
 
-#A* search with look ahead
+#Heuristic Depth First Search
 def getRoute_v2(source, desti):
 
     dest =  desti
@@ -142,6 +142,8 @@ def bestRoute(current, transit, maxDepth, maxWidth, currTransits):
         transit_copy = t2.join()
         cityDist_copy = t3.join()
 
+
+
         t = ThreadWithReturnValue(target=bestRoute2, args=(x[0], route, transit_copy, cityDist_copy, current_depth, maxDepth, maxWidth, 0,currTransits + 1))
         t.start()
         threads.append(t)
@@ -198,28 +200,22 @@ def bestRoute2(current, route, transit, cityDist, currDepth, maxDepth, maxWidth,
 
     best_route = []
     threads = []
+
     for x in closest:
         # Create copy before passing it to next level
 
         t1 = thread_copyRoute(route, x)
-        #route_copy = deepcopy(route)
         t1.start()
 
         t2 = thread_copyTransit(transit, x)
-        #transit_copy = deepcopy(transit)
         t2.start()
 
         t3 = thread_copyCitydist(cityDist, x)
-        #cityDist_copy = deepcopy(cityDist)
         t3.start()
 
         route_copy = t1.join()
         transit_copy = t2.join()
         cityDist_copy = t3.join()
-
-        #route_copy.append(x[0])
-        #transit_copy.remove(x[0])
-        #cityDist_copy.remove(x)
 
         # Cost/Distance from current node to X
         cost = x[2] - x[1]
