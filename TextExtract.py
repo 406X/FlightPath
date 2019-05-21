@@ -2,6 +2,7 @@ import urllib
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
 import html5lib
+import string
 
 link1 = "https://www.textise.net/showText.aspx?strURL=http%3a%2f%2f"
 link2 = "google.com"
@@ -58,8 +59,15 @@ def addIndex(word, index, hash):
 
 #Need to remove symbols, urls and stop words
 for x in Text.stripped_strings:
-    for y in x.split():
-        # print(x)
+    x.translate(str.maketrans("","",string.punctuation))
+
+    #Removes punctuations
+    cleanStr = ""
+    for c in x:
+        if c in string.ascii_letters or c in " ":
+            cleanStr = cleanStr + c
+
+    for y in cleanStr.split():
         hash = getHash(y)
         index =retrieveIndex(y,hash)
         if(index == -1):
