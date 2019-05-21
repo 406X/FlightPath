@@ -14,15 +14,11 @@ Text = BeautifulSoup(text,'html5lib')
 for script in Text(["script", "style"]):
     script.decompose()
 
-for x in Text.stripped_strings:
-    print(x)
-
-
-
-
 
 tableSize = 10000
+wordList = [None] * tableSize
 hTable = [None] * tableSize
+wordCount = 0
 
 def getHash(input):
     hash = 0
@@ -32,7 +28,48 @@ def getHash(input):
         hash+=((count)**2)*(ord(x))
         count+=1
 
-    hash = hash%10000
+    hash = hash%tableSize
 
     return hash
+
+def retrieveIndex(word, hash):
+
+    if(hTable[hash]==None):
+        return -1
+    elif(type(hTable[hash][0]) == list):
+        for x in hTable[hash]:
+            if(x[0]==word):
+                return x[1]
+            elif(x[0] == word):
+                return x[1]
+    elif(hTable[0] == word ):
+                return hTable[hash][1]
+
+    return -1
+
+def addIndex(word, index, hash):
+    if( hTable[hash] == None ):
+        hTable[hash] = [word, index]
+    elif ( type(hTable[hash][0]) == list):
+        hTable[hash].append([word, index])
+    else:
+        hTable[hash] = [hTable[hash], [word, index]]
+
+
+#Need to remove symbols, urls and stop words
+for x in Text.stripped_strings:
+    for y in x.split():
+        # print(x)
+        hash = getHash(y)
+        index =retrieveIndex(y,hash)
+        if(index == -1):
+            wordList[wordCount] = [y,1]
+            addIndex(y,wordCount,hash)
+            wordCount+=1
+        else:
+            wordList[index][1]+=1
+
+for x in wordList:
+    print(x)
+
 
