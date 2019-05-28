@@ -2,15 +2,14 @@ import string
 import re
 import json
 import requests
+from threading import Thread
 
 tableSize = 2000
-wordList = [None]
-hTable = [None] * tableSize
 hTableSentiment = [None] * tableSize
 positiveList = []
 negativeList = []
 stopList = []
-wordCount = 0
+
 
 def getHash(input):
     hash = 0
@@ -24,7 +23,7 @@ def getHash(input):
 
     return hash
 
-def retrieveIndex(word, hash):
+def retrieveIndex(word, hash,hTable):
     if(hTable[hash] == None):
         return -1
     elif( type( hTable[hash][0] ) == list):
@@ -51,8 +50,7 @@ def retrieveSentiment(country, hash):
             return hTableSentiment[hash][1]
     return -1
 
-def addIndex(word, index, hash):
-    global hTable
+def addIndex(word, index, hash,hTable):
     if( hTable[hash] == None ):
         hTable[hash] = [word, index]
     elif ( type(hTable[hash][0]) == list):
@@ -98,9 +96,10 @@ def string_normalize(input):
     return cleanStr
 
 def getTokens(input):
-    global wordList
-    global wordCount
+    wordList = [None]
+    hTable = [None] * tableSize
     country = input
+    wordCount = 0
 
     newsResponse = requests.get("https://newsapi.org/v2/everything?q="+country+"&apiKey=e55e396153fe47d4a405dca429297f97")
     newStr = json.dumps(newsResponse.json())
@@ -118,14 +117,14 @@ def getTokens(input):
             for y in cleanStr.split():
                 hash = getHash(y)
 
-                index = retrieveIndex(y, hash)
+                index = retrieveIndex(y, hash,hTable)
                 if (index == -1):
                     if(wordCount == 0):
                         wordList = [[y,1]]
                     else:
                         wordList.append( [y, 1] )
 
-                    addIndex(y, wordCount, hash)
+                    addIndex(y, wordCount, hash,hTable)
                     wordCount += 1
 
                 else:
@@ -155,6 +154,28 @@ def init():
         d = string_normalize(d)
         negativeList.append(d)
 
+class simpleThread(Thread):
+    def __init__(self, group=None, target=None, name=None, args=(), Verbose=None):
+        Thread.__init__(self, group, target, name, args)
+
+
+    def run(self):
+        self._target(self._args)
+
+    def join(self, *args):
+        Thread.join(self, *args)
+
+
+def init2(cities):
+    threads = []
+    for x in cities:
+        t = simpleThread(target=getSentiment, args=x)
+        t.start()
+        threads.append(t)
+
+    for x in threads:
+        x.join()
+
 def getSentiment(input):
     pointsPositive = 0
     pointsNegative = 0
@@ -164,7 +185,6 @@ def getSentiment(input):
     if (score != -1):
         return score
     else:
-
         tokens = getTokens(input)
         words = []
         frequency = []
