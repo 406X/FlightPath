@@ -36,17 +36,17 @@ def retrieveIndex(word, hash,hTable):
             return hTable[hash][1]
     return -1
 
-def retrieveSentiment(city, hash):
+def retrieveSentiment(country, hash):
 
     if(hTableSentiment[hash] == None):
         return -1
     elif( type( hTableSentiment[hash][0] ) == list):
         for x in hTableSentiment[hash]:
-            if(x[0] == city):
+            if(x[0] == country):
                 return x[1]
-            elif(x[0] == city):
+            elif(x[0] == country):
                 return x[1]
-    elif(hTableSentiment[hash][0] == city):
+    elif(hTableSentiment[hash][0] == country):
             return hTableSentiment[hash][1]
     return -1
 
@@ -58,14 +58,14 @@ def addIndex(word, index, hash,hTable):
     else:
         hTable[hash] = [ hTable[hash], [word, index] ]
 
-def addSentiment(city, score, hash):
+def addSentiment(country, score, hash):
     global hTableSentiment
     if( hTableSentiment[hash] == None ):
-        hTableSentiment[hash] = [city, score]
+        hTableSentiment[hash] = [country, score]
     elif ( type(hTableSentiment[hash][0]) == list):
-        hTableSentiment[hash].append([city, score])
+        hTableSentiment[hash].append([country, score])
     else:
-        hTableSentiment[hash] = [hTableSentiment[hash], [city, score]]
+        hTableSentiment[hash] = [hTableSentiment[hash], [country, score]]
 
 def string_removeURL(input):
     input = re.sub("www.[\w]", "", input)
@@ -98,10 +98,10 @@ def string_normalize(input):
 def getTokens(input):
     wordList = [None]
     hTable = [None] * tableSize
-    city = input
+    country = input
     wordCount = 0
 
-    newsResponse = requests.get("https://newsapi.org/v2/everything?q="+city+"&apiKey=e55e396153fe47d4a405dca429297f97")
+    newsResponse = requests.get("https://newsapi.org/v2/everything?q="+country+"&apiKey=e55e396153fe47d4a405dca429297f97")
     newStr = json.dumps(newsResponse.json())
 
     #Counts how many words in list
