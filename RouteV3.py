@@ -12,8 +12,42 @@ minTransits = 0
 dest = ""
 bestcost = -1
 
-#Heuristic Depth First Search
-def getRoute_v2(source, desti):
+def getAllRoutes(source,desti):
+    dest = desti
+    transit = cities
+    transit.remove(source)
+    transit.remove(dest)
+    toTransit = []
+    allRoutes = []
+    # Depth of search algo
+    # for best result use searchDepth = minTransits
+    # Exponentially increases search time
+    searchDepth = minTransits
+
+    # Width of search algo
+    # defines how many cities should be considered as transit at each depth level
+    searchWidth = 3  # len(cities)
+
+    currTransits = 0
+    current = source
+
+    while (currTransits < minTransits):
+
+        toTransit.extend(bestRoute(current, transit, searchDepth, searchWidth, currTransits, allRoutes))
+
+        currTransits = len(toTransit)
+        for t in toTransit:
+            try:
+                transit.remove(t)
+            except KeyError:
+                pass
+
+        current = toTransit[len(toTransit) - 1]
+
+    #print(allRoutes)
+    return allRoutes
+
+def getBestRoute(source, desti):
 
     dest =  desti
     transit = cities
@@ -28,8 +62,7 @@ def getRoute_v2(source, desti):
 
     # Width of search algo
     # defines how many cities should be considered as transit at each depth level
-    # low effect on search results
-    searchWidth = 3
+    searchWidth = 3 #len(cities)
 
     currTransits = 0
     current = source
@@ -48,8 +81,6 @@ def getRoute_v2(source, desti):
         current = toTransit[len(toTransit) - 1]
 
         totalCost += bestcost
-
-
 
     return toTransit
 
@@ -97,7 +128,7 @@ def getXClosest(cityDist, X):
     return closest
 
 
-def bestRoute(current, transit, maxDepth, maxWidth, currTransits):
+def bestRoute(current, transit, maxDepth, maxWidth, currTransits, allRoutes = []):
     global bestcost
 
     bestcost = -1
@@ -110,6 +141,7 @@ def bestRoute(current, transit, maxDepth, maxWidth, currTransits):
     # cityDist[index][0] = distance of current node to source
     # cityDist[index][0] = distance of current node to source + current node to destination
     cityDist = []
+
 
     count = 0
     threads = []
@@ -144,7 +176,7 @@ def bestRoute(current, transit, maxDepth, maxWidth, currTransits):
 
 
 
-        t = ThreadWithReturnValue(target=bestRoute2, args=(x[0], route, transit_copy, cityDist_copy, current_depth, maxDepth, maxWidth, 0,currTransits + 1))
+        t = ThreadWithReturnValue(target=bestRoute2, args=(x[0], route, transit_copy, cityDist_copy, current_depth, maxDepth, maxWidth, 0,currTransits + 1, allRoutes))
         t.start()
         threads.append(t)
 
@@ -162,7 +194,7 @@ def bestRoute(current, transit, maxDepth, maxWidth, currTransits):
 
     return best_route
 
-def bestRoute2(current, route, transit, cityDist, currDepth, maxDepth, maxWidth, currCost, currTransits):
+def bestRoute2(current, route, transit, cityDist, currDepth, maxDepth, maxWidth, currCost, currTransits , allRoutes = []):
     global bestcost
 
     currDepth += 1
@@ -171,6 +203,7 @@ def bestRoute2(current, route, transit, cityDist, currDepth, maxDepth, maxWidth,
     totalCost = nextCost + currCost
 
     if (currTransits >= minTransits):
+        allRoutes.append(route)
         route.append(totalCost)
         return route
     elif (totalCost > bestcost and bestcost != -1):
@@ -220,7 +253,7 @@ def bestRoute2(current, route, transit, cityDist, currDepth, maxDepth, maxWidth,
         # Cost/Distance from current node to X
         cost = x[2] - x[1]
 
-        t = ThreadWithReturnValue(target=bestRoute2, args=(x[0], route_copy, transit_copy, cityDist_copy, currDepth, maxDepth, maxWidth, currCost + cost, currTransits + 1))
+        t = ThreadWithReturnValue(target=bestRoute2, args=(x[0], route_copy, transit_copy, cityDist_copy, currDepth, maxDepth, maxWidth, currCost + cost, currTransits + 1,allRoutes))
         t.start()
         threads.append(t)
 
