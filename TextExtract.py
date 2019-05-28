@@ -3,9 +3,10 @@ import re
 import json
 import requests
 
-tableSize = 10000
+tableSize = 2000
 wordList = [None]
 hTable = [None] * tableSize
+hTableSentiment = [None] * tableSize
 positiveList = []
 negativeList = []
 stopList = []
@@ -36,6 +37,20 @@ def retrieveIndex(word, hash):
             return hTable[hash][1]
     return -1
 
+def retrieveSentiment(country, hash):
+
+    if(hTableSentiment[hash] == None):
+        return -1
+    elif( type( hTableSentiment[hash][0] ) == list):
+        for x in hTableSentiment[hash]:
+            if(x[0] == country):
+                return x[1]
+            elif(x[0] == country):
+                return x[1]
+    elif(hTableSentiment[hash][0] == country):
+            return hTableSentiment[hash][1]
+    return -1
+
 def addIndex(word, index, hash):
     if( hTable[hash] == None ):
         hTable[hash] = [word, index]
@@ -44,6 +59,13 @@ def addIndex(word, index, hash):
     else:
         hTable[hash] = [ hTable[hash], [word, index] ]
 
+def addSentiment(country, score, hash):
+    if( hTableSentiment[hash] == None ):
+        hTableSentiment[hash] = [country, score]
+    elif ( type(hTableSentiment[hash][0]) == list):
+        hTableSentiment[hash].append([country, score])
+    else:
+        hTableSentiment[hash] = [hTableSentiment[hash], [country, score]]
 
 def string_removeURL(input):
     input = re.sub("www.[\w]", "", input)
@@ -107,9 +129,6 @@ def getTokens(input):
                 else:
                     wordList[index][1] += 1
 
-    for x in range(wordCount):
-        print(wordList[x])
-
     return wordList
 
 def __init__():
@@ -138,31 +157,36 @@ def getSentiment(input):
     pointsPositive = 0
     pointsNegative = 0
 
-    tokens = getTokens(input)
-    words = []
-    frequency = []
-    print(tokens)
-    for x in tokens:
-        print(x[0])
-        words.append(x[0])
-        frequency.append(x[1])
+    hash = getHash(input)
+    score = retrieveSentiment(input, hash)
+    if (score != -1):
+        return score
+    else:
 
-    length = len(words)
-    for x in range(length):
-        print(words[x])
-        if(words[x] in positiveList):
-            pointsPositive += frequency[x]
+        tokens = getTokens(input)
+        words = []
+        frequency = []
+        for x in tokens:
+            print(x[0])
+            words.append(x[0])
+            frequency.append(x[1])
 
-        elif(words[x] in negativeList):
-            pointsNegative += frequency[x]
+        length = len(words)
+        for x in range(length):
+            print(words[x])
+            if(words[x] in positiveList):
+                pointsPositive += frequency[x]
+
+            elif(words[x] in negativeList):
+                pointsNegative += frequency[x]
+
+        score = pointsPositive - pointsNegative
+        addSentiment(input,score,hash)
 
     print(pointsNegative)
     print(pointsPositive)
-
-    return pointsPositive-pointsNegative
-
+    return score
 
 
 __init__()
 print(getSentiment("Malaysia"))
-
