@@ -36,17 +36,17 @@ def retrieveIndex(word, hash,hTable):
             return hTable[hash][1]
     return -1
 
-def retrieveSentiment(country, hash):
+def retrieveSentiment(city, hash):
 
     if(hTableSentiment[hash] == None):
         return -1
     elif( type( hTableSentiment[hash][0] ) == list):
         for x in hTableSentiment[hash]:
-            if(x[0] == country):
+            if(x[0] == city):
                 return x[1]
-            elif(x[0] == country):
+            elif(x[0] == city):
                 return x[1]
-    elif(hTableSentiment[hash][0] == country):
+    elif(hTableSentiment[hash][0] == city):
             return hTableSentiment[hash][1]
     return -1
 
@@ -58,14 +58,14 @@ def addIndex(word, index, hash,hTable):
     else:
         hTable[hash] = [ hTable[hash], [word, index] ]
 
-def addSentiment(country, score, hash):
+def addSentiment(city, score, hash):
     global hTableSentiment
     if( hTableSentiment[hash] == None ):
-        hTableSentiment[hash] = [country, score]
+        hTableSentiment[hash] = [city, score]
     elif ( type(hTableSentiment[hash][0]) == list):
-        hTableSentiment[hash].append([country, score])
+        hTableSentiment[hash].append([city, score])
     else:
-        hTableSentiment[hash] = [hTableSentiment[hash], [country, score]]
+        hTableSentiment[hash] = [hTableSentiment[hash], [city, score]]
 
 def string_removeURL(input):
     input = re.sub("www.[\w]", "", input)
@@ -98,10 +98,10 @@ def string_normalize(input):
 def getTokens(input):
     wordList = [None]
     hTable = [None] * tableSize
-    country = input
+    city = input
     wordCount = 0
 
-    newsResponse = requests.get("https://newsapi.org/v2/everything?q="+country+"&apiKey="+API_KEY)
+    newsResponse = requests.get("https://newsapi.org/v2/everything?q="+city+"&apiKey="+API_KEY)
     newStr = json.dumps(newsResponse.json())
 
     #Counts how many words in list
@@ -157,7 +157,6 @@ def init():
 class simpleThread(Thread):
     def __init__(self, group=None, target=None, name=None, args=(), Verbose=None):
         Thread.__init__(self, group, target, name, args)
-
 
     def run(self):
         self._target(self._args)
