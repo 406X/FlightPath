@@ -89,24 +89,15 @@ def partition(arr, low, high,compareVal = 2):
 
 
     i = (low - 1)
-    pivot = deepcopy(arr[high][compareVal])
+    pivot = arr[high][compareVal]
 
     for j in range(low, high):
 
         if arr[j][compareVal] <= pivot:
             i = i + 1
-            #arr[i], arr[j] = arr[j], arr[i]
+            arr[i], arr[j] = arr[j], arr[i]
 
-            temp = deepcopy(arr[i])
-            arr[i] = arr[j]
-            arr[j] = temp
-
-
-    temp = deepcopy(arr[i + 1])
-    arr[i + 1] = arr[high]
-    arr[high] = temp
-
-    #arr[i + 1], arr[high] = deepcopy(arr[high]), deepcopy(arr[i + 1])
+    arr[i + 1], arr[high] = deepcopy(arr[high]), deepcopy(arr[i + 1])
     return (i + 1)
 
 
