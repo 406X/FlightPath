@@ -167,7 +167,6 @@ def getSentiment(input):
         words = []
         frequency = []
         for x in tokens:
-            print(x[0])
             words.append(x[0])
             frequency.append(x[1])
 
