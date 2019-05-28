@@ -10,6 +10,7 @@ hTableSentiment = [None] * tableSize
 positiveList = []
 negativeList = []
 stopList = []
+wordCount = 0
 
 def getHash(input):
     hash = 0
@@ -24,7 +25,6 @@ def getHash(input):
     return hash
 
 def retrieveIndex(word, hash):
-
     if(hTable[hash] == None):
         return -1
     elif( type( hTable[hash][0] ) == list):
@@ -52,6 +52,7 @@ def retrieveSentiment(country, hash):
     return -1
 
 def addIndex(word, index, hash):
+    global hTable
     if( hTable[hash] == None ):
         hTable[hash] = [word, index]
     elif ( type(hTable[hash][0]) == list):
@@ -60,6 +61,7 @@ def addIndex(word, index, hash):
         hTable[hash] = [ hTable[hash], [word, index] ]
 
 def addSentiment(country, score, hash):
+    global hTableSentiment
     if( hTableSentiment[hash] == None ):
         hTableSentiment[hash] = [country, score]
     elif ( type(hTableSentiment[hash][0]) == list):
@@ -96,13 +98,14 @@ def string_normalize(input):
     return cleanStr
 
 def getTokens(input):
+    global wordList
+    global wordCount
     country = input
 
     newsResponse = requests.get("https://newsapi.org/v2/everything?q="+country+"&apiKey=e55e396153fe47d4a405dca429297f97")
     newStr = json.dumps(newsResponse.json())
 
     #Counts how many words in list
-    wordCount = 0
 
     for x in newStr.split():
         cleanStr = x
@@ -116,7 +119,6 @@ def getTokens(input):
                 hash = getHash(y)
 
                 index = retrieveIndex(y, hash)
-
                 if (index == -1):
                     if(wordCount == 0):
                         wordList = [[y,1]]
@@ -131,7 +133,7 @@ def getTokens(input):
 
     return wordList
 
-def __init__():
+def init():
     stops = open("stopword.txt", encoding='utf-8')
     for c in stops:
         d = c.strip()
@@ -172,7 +174,6 @@ def getSentiment(input):
 
         length = len(words)
         for x in range(length):
-            print(words[x])
             if(words[x] in positiveList):
                 pointsPositive += frequency[x]
 
@@ -182,10 +183,5 @@ def getSentiment(input):
         score = pointsPositive - pointsNegative
         addSentiment(input,score,hash)
 
-    print(pointsNegative)
-    print(pointsPositive)
     return score
 
-
-__init__()
-print(getSentiment("Malaysia"))
