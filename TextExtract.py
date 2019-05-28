@@ -1,25 +1,18 @@
-import urllib
-from urllib.request import urlopen
-from bs4 import BeautifulSoup
-import html5lib
+#   import urllib
+#from urllib.request import urlopen
+#from bs4 import BeautifulSoup
+#import html5lib
 import string
 import re
-
-link1 = "https://www.textise.net/showText.aspx?strURL=http%3a%2f%2f"
-link2 = "google.com"
-link = link1 + link2
-req = urllib.request.Request(link,headers ={'User-Agent': "Mozilla/5.0"})
-text = urllib.request.urlopen(req)
-
-Text = BeautifulSoup(text,'html5lib')
-for script in Text(["script", "style"]):
-    script.decompose()
-
+import json
+import requests
 
 tableSize = 10000
-wordList = [None] * tableSize
+wordList = [None]
 hTable = [None] * tableSize
-wordCount = 0
+positiveList = []
+negativeList = []
+stopList = []
 
 def getHash(input):
     hash = 0
@@ -67,7 +60,7 @@ def string_removePunctuation(input):
     cleanStr = ""
 
     for c in input:
-        if c in string.ascii_letters or c in " ":
+        if c in string.ascii_letters or c in " " :
             cleanStr = cleanStr + c
 
     return cleanStr
@@ -84,34 +77,112 @@ def string_normalize(input):
     cleanStr = input.lower()
     return cleanStr
 
-stops = open("stopword.txt", encoding='utf-8')
-stopList = []
+def getTokens(input):
+    country = "Malaysia"
+    country = input
 
-for c in stops:
-    stopList.append(c.strip())
+    #link1 = "https://www.textise.net/showText.aspx?strURL=http%3a%2f%2f"
+    #link2 = "google.com"
+    #link = link1 + link2
+    #req = urllib.request.Request(link, headers={'User-Agent': "Mozilla/5.0"})
+    #text = urllib.request.urlopen(req)
 
-for x in Text.stripped_strings:
+    #Text = BeautifulSoup(text, 'html5lib')
 
-    cleanStr = x
-    cleanStr = string_removeURL(cleanStr)
-    cleanStr = string_removeInList(cleanStr, stopList)
-    cleanStr = string_removePunctuation(cleanStr)
-    cleanStr = string_normalize(cleanStr)
+    #for script in Text(["script", "style"]):
+    #    script.decompose(
 
-    if(cleanStr!=''):
-        for y in cleanStr.split():
-            hash = getHash(y)
+    newsResponse = requests.get("https://newsapi.org/v2/everything?q="+country+"&apiKey=e55e396153fe47d4a405dca429297f97")
+    newStr = json.dumps(newsResponse.json())
 
-            index =retrieveIndex(y,hash)
+    #Counts how many words in list
+    wordCount = 0
 
-            if(index == -1):
-                wordList[wordCount] = [y,1]
-                addIndex(y,wordCount,hash)
-                wordCount+=1
-            else:
-                wordList[index][1]+=1
+    for x in newStr.split():
+    #for x in Text.stripped_strings:
 
-for x in range(wordCount):
-    print(wordList[x])
+        cleanStr = x
+        cleanStr = string_removeURL(cleanStr)
+        cleanStr = string_removeInList(cleanStr, stopList)
+        cleanStr = string_removePunctuation(cleanStr)
+        cleanStr = string_normalize(cleanStr)
 
+        if (cleanStr != ''):
+            for y in cleanStr.split():
+                hash = getHash(y)
+
+                index = retrieveIndex(y, hash)
+
+                if (index == -1):
+                    if(wordCount == 0):
+                        wordList = [[y,1]]
+                    else:
+                        wordList.append( [y, 1] )
+
+                    addIndex(y, wordCount, hash)
+                    wordCount += 1
+
+                else:
+                    wordList[index][1] += 1
+
+    for x in range(wordCount):
+        print(wordList[x])
+
+    return wordList
+
+def __init__():
+    stops = open("stopword.txt", encoding='utf-8')
+    for c in stops:
+        d = c.strip()
+        d = string_removePunctuation(d)
+        d = string_normalize(d)
+        stopList.append(d)
+
+    positive = stops = open("positive-words.txt")
+    for c in positive:
+        d = c.strip()
+        d = string_removePunctuation(d)
+        d = string_normalize(d)
+        positiveList.append(d)
+
+    negative = stops = open("negative-words.txt")
+    for c in negative:
+        d = c.strip()
+        d = string_removePunctuation(d)
+        d = string_normalize(d)
+        negativeList.append(d)
+
+def getSentiment(input):
+    pointsPositive = 0
+    pointsNegative = 0
+
+    tokens = getTokens(input)
+    words = []
+    frequency = []
+    print(tokens)
+    for x in tokens:
+        print(x[0])
+        words.append(x[0])
+        frequency.append(x[1])
+
+    length = len(words)
+    for x in range(length):
+        print(words[x])
+        if(words[x] in positiveList):
+            pointsPositive+= frequency[x]
+
+        elif(words[x] in negativeList):
+            pointsNegative+= frequency[x]
+
+
+    print(pointsNegative)
+    print(pointsPositive)
+
+    return pointsPositive-pointsNegative
+
+
+
+__init__()
+#getTokens("Amsterdam")
+print(getSentiment("Malaysia"))
 
