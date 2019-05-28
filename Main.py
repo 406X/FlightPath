@@ -80,20 +80,6 @@ def calculateSentimentScores(routes):
 
 print("Generating route...")
 
-#For easy multithreading with return values
-class ThreadWithReturnValue(Thread):
-    def __init__(self, group=None, target=None, name=None, args=()):
-        Thread.__init__(self, group, target, name, args)
-        self._return = None
-
-    def run(self):
-        if self._target is not None:
-            self._return = self._target(self._args)
-
-    def join(self, *args):
-        Thread.join(self, *args)
-        return self._return
-
 class thread_Thread(threading.Thread):
     def __init__(self, x):
         threading.Thread.__init__(self)
@@ -106,15 +92,8 @@ class thread_Thread(threading.Thread):
         for y in range(length):
             if (type(x[y]) == float):
                 continue
-            t = ThreadWithReturnValue( target=TE.getSentiment, args=(self.x[y]) )
-            t.start()
-            Thread3.append(t)
-
-        for r in Thread3:
-            totalSentimentScore += r.join()
-
-        self.x.append(totalSentimentScore)
-
+            totalSentimentScore += TE.getSentiment(x[y])
+        x.append(totalSentimentScore)
 
     def join(self):
         Thread.join(self)
@@ -129,11 +108,14 @@ RT.dest = dest
 RT.minTransits = numTransits
 lc.API_KEY = API_KEY
 TE.init()
+t = Thread(TE.init2(cities))
+t.start()
 
 
 routes = RT.getAllRoutes(source, dest)
 Thread2 = []
 
+t.join()
 for x in routes:
     t = thread_Thread(x)
     t.start()
@@ -142,12 +124,17 @@ for x in routes:
 for r in Thread2:
     r.join()
 
-for x in routes:
-    print(x)
+routes = RT.quickSort( routes, 0 , len(routes)-1, val = len(routes[0])-2 )
+
+bestRoute = []
+for x in routes[0]:
+    if( type(x) == float):
+        break
+    bestRoute.append(x)
 
 end = time.time()
 print("Time:")
 print(end - startTime)
 
-#showRoute(route)
+showRoute(bestRoute)
 

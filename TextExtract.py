@@ -9,7 +9,7 @@ hTableSentiment = [None] * tableSize
 positiveList = []
 negativeList = []
 stopList = []
-
+API_KEY = "700b3d57bcdf4813b66949f4460dc591"
 
 def getHash(input):
     hash = 0
@@ -101,7 +101,7 @@ def getTokens(input):
     country = input
     wordCount = 0
 
-    newsResponse = requests.get("https://newsapi.org/v2/everything?q="+country+"&apiKey=e55e396153fe47d4a405dca429297f97")
+    newsResponse = requests.get("https://newsapi.org/v2/everything?q="+country+"&apiKey="+API_KEY)
     newStr = json.dumps(newsResponse.json())
 
     #Counts how many words in list

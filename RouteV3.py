@@ -85,32 +85,42 @@ def getBestRoute(source, desti):
     return toTransit
 
 
-def partition(arr, low, high):
-    compareVal = 2
+def partition(arr, low, high,compareVal = 2):
+
+
     i = (low - 1)
-    pivot = arr[high][compareVal]
+    pivot = deepcopy(arr[high][compareVal])
 
     for j in range(low, high):
 
         if arr[j][compareVal] <= pivot:
             i = i + 1
-            arr[i], arr[j] = arr[j], arr[i]
+            #arr[i], arr[j] = arr[j], arr[i]
 
-    arr[i + 1], arr[high] = deepcopy(arr[high]), deepcopy(arr[i + 1])
+            temp = deepcopy(arr[i])
+            arr[i] = arr[j]
+            arr[j] = temp
+
+
+    temp = deepcopy(arr[i + 1])
+    arr[i + 1] = arr[high]
+    arr[high] = temp
+
+    #arr[i + 1], arr[high] = deepcopy(arr[high]), deepcopy(arr[i + 1])
     return (i + 1)
 
 
-def quickSort(arr, low, high):
-    if low < high:
-        pi = partition(arr, low, high)
+def quickSort(arr, low, high, val = 2 ):
 
-        t1 = Thread( target=quickSort, args=(arr, low, pi - 1))
-        t2 = Thread( target=quickSort, args=(arr, pi + 1, high))
+    if low < high:
+        pi = partition(arr, low, high,compareVal=val)
+        t1 = Thread( target=quickSort, args=(arr, low, pi - 1, val))
+        t2 = Thread( target=quickSort, args=(arr, pi + 1, high,val))
         t1.start()
         t2.start()
         t1.join()
         t2.join()
-
+    return arr
 
 def getXClosest(cityDist, X):
     quickSort(cityDist, 0, len(cityDist) - 1)
