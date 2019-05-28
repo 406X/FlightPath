@@ -172,7 +172,6 @@ def getSentiment(input):
 
         length = len(words)
         for x in range(length):
-            print(words[x])
             if(words[x] in positiveList):
                 pointsPositive += frequency[x]
 
