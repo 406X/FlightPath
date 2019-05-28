@@ -1,7 +1,3 @@
-#   import urllib
-#from urllib.request import urlopen
-#from bs4 import BeautifulSoup
-#import html5lib
 import string
 import re
 import json
@@ -78,19 +74,7 @@ def string_normalize(input):
     return cleanStr
 
 def getTokens(input):
-    country = "Malaysia"
     country = input
-
-    #link1 = "https://www.textise.net/showText.aspx?strURL=http%3a%2f%2f"
-    #link2 = "google.com"
-    #link = link1 + link2
-    #req = urllib.request.Request(link, headers={'User-Agent': "Mozilla/5.0"})
-    #text = urllib.request.urlopen(req)
-
-    #Text = BeautifulSoup(text, 'html5lib')
-
-    #for script in Text(["script", "style"]):
-    #    script.decompose(
 
     newsResponse = requests.get("https://newsapi.org/v2/everything?q="+country+"&apiKey=e55e396153fe47d4a405dca429297f97")
     newStr = json.dumps(newsResponse.json())
@@ -99,8 +83,6 @@ def getTokens(input):
     wordCount = 0
 
     for x in newStr.split():
-    #for x in Text.stripped_strings:
-
         cleanStr = x
         cleanStr = string_removeURL(cleanStr)
         cleanStr = string_removeInList(cleanStr, stopList)
@@ -169,11 +151,10 @@ def getSentiment(input):
     for x in range(length):
         print(words[x])
         if(words[x] in positiveList):
-            pointsPositive+= frequency[x]
+            pointsPositive += frequency[x]
 
         elif(words[x] in negativeList):
-            pointsNegative+= frequency[x]
-
+            pointsNegative += frequency[x]
 
     print(pointsNegative)
     print(pointsPositive)
@@ -183,6 +164,5 @@ def getSentiment(input):
 
 
 __init__()
-#getTokens("Amsterdam")
 print(getSentiment("Malaysia"))
 
