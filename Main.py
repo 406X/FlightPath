@@ -140,6 +140,7 @@ routes = RT.quickSort( routes, 0 , len(routes)-1, val = length )
 lengthRoutes = len(routes)
 if(numRoutes>len(routes)):
     print("## Requested " + str(numRoutes) + " routes but only " + str(lengthRoutes) +" Available." )
+    numRoutes = len(routes)
 
 #Probability calculation based on distance alone
 totalDist = 0.0
