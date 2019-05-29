@@ -1,8 +1,3 @@
-import string
-import re
-import json
-import requests
-from threading import Thread,Lock
 import stringFuncs as SF
 
 tableSize = 1000
