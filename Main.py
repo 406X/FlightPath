@@ -120,24 +120,6 @@ def start():
     for r in Thread2:
         r.join()
 
-    while (1 == 1):
-        choice = input("Would you like to display Plotly charts on data that were mined?(Y/N): ")
-        if (choice == "Y" or choice == "y"):
-            list1 = TE.getStopList()
-            plotHistogram(list1,name="Stops.html")
-            list2 = TE.getWordList()
-            plotHistogram(list2,name="Words.html")
-            list3 = TE.getPositiveList()
-            plotHistogram(list3,name="Positive.html")
-            list4 = TE.getNegativeList()
-            plotHistogram(list4,name="Negative.html")
-            break
-        elif (choice == "N" or choice == "n"):
-            break
-        else:
-            print("Invalid Option")
-            continue
-
     length = len(routes[0]) - 2
     routes = RT.quickSort(routes, 0, len(routes) - 1, val=length)
 
@@ -168,6 +150,24 @@ def start():
 
     end = time.time()
     print("Time: " + str(end - startTime))
+
+    while (1 == 1):
+        choice = input("Would you like to display Plotly charts on data that were mined?(Y/N): ")
+        if (choice == "Y" or choice == "y"):
+            list1 = TE.getStopList()
+            plotHistogram(list1,name="Stops.html")
+            list2 = TE.getWordList()
+            plotHistogram(list2,name="Words.html")
+            list3 = TE.getPositiveList()
+            plotHistogram(list3,name="Positive.html")
+            list4 = TE.getNegativeList()
+            plotHistogram(list4,name="Negative.html")
+            break
+        elif (choice == "N" or choice == "n"):
+            break
+        else:
+            print("Invalid Option")
+            continue
 
     numChoice = 0
     while (1 == 1):
