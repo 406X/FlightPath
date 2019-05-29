@@ -76,6 +76,45 @@ def addSentiment(city, score, hash):
     else:
         hTableSentiment[hash] = [hTableSentiment[hash], [city, score]]
 
+
+def search(pat, txt, q=101):
+    d = 256
+    M = len(pat)
+    N = len(txt)
+    i = 0
+    j = 0
+    p = 0
+    t = 0
+    h = 1
+
+    if(N!=M):
+        return -1
+
+    for i in range(M - 1):
+        h = (h * d) % q
+
+    for i in range(M):
+        p = (d * p + ord(pat[i])) % q
+        t = (d * t + ord(txt[i])) % q
+
+    for i in range(N - M + 1):
+        if p == t:
+            for j in range(M):
+                if txt[i + j] != pat[j]:
+                    break
+
+            j += 1
+            if j == M:
+                return 1
+
+        if i < N - M:
+            t = (d * (t - ord(txt[i]) * h) + ord(txt[i + M])) % q
+
+            if t < 0:
+                t = t + q
+
+    return -1
+
 def getTokens(input):
     global wordCount
     global wordList
@@ -96,29 +135,28 @@ def getTokens(input):
     for x in newStr.split():
         cleanStr = x
         cleanStr = SF.string_removeURL(cleanStr)
+        cleanStr = SF.string_removePunctuation(cleanStr)
+        cleanStr = SF.string_normalize(cleanStr)
 
-        for c in cleanStr.split():
-            if (c.lower() not in stopList):
-                cleanStr = cleanStr + " " + c
-            else:
-                cc = c.lower()
-                hash = getHash(cc)
+        for c in stopList:
 
-                index = retrieveIndex(cc, hash, hTableStops)
+            found =  search(cleanStr,c)
+
+            if(found == 1):
+                hash = getHash(cleanStr)
+
+                index = retrieveIndex(cleanStr, hash, hTableStops)
                 if (index == -1):
-                    addIndex(cc, stopCount, hash, hTableStops)
+                    addIndex(cleanStr, stopCount, hash, hTableStops)
                     if (stopCount == 0):
-                        foundStops = [[cc, 1]]
+                        foundStops = [[cleanStr, 1]]
                     else:
-                        foundStops.append([cc, 1])
+                        foundStops.append([cleanStr, 1])
                     stopCount += 1
 
                 else:
                     foundStops[index][1] += 1
-
-
-        cleanStr = SF.string_removePunctuation(cleanStr)
-        cleanStr = SF.string_normalize(cleanStr)
+                x=""
 
         lock = Lock()
         if (cleanStr != ''):
