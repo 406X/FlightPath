@@ -177,15 +177,6 @@ def start():
         if (choice == "N" or choice == "n"):
             break
 
-
-def calculateSentimentScores(routes):
-
-    for x in routes:
-        pass
-
-
-    return
-
 print("Generating route...")
 
 class thread_Thread(threading.Thread):
