@@ -12,8 +12,8 @@ foundPositive = [None]
 foundNegative = [None]
 stopList = []
 foundStops = [None]
-API_KEY = "700b3d57bcdf4813b66949f4460dc591"
-#API_KEY = "e55e396153fe47d4a405dca429297f97"
+#API_KEY = "700b3d57bcdf4813b66949f4460dc591"
+API_KEY = "e55e396153fe47d4a405dca429297f97"
 wordCount = 0
 stopCount = 0
 positiveCount = 0
@@ -138,11 +138,13 @@ def getTokens(input):
         cleanStr = SF.string_removePunctuation(cleanStr)
         cleanStr = SF.string_normalize(cleanStr)
 
+        lock = Lock()
+
         for c in stopList:
 
-            found =  search(cleanStr,c)
+            found = search(cleanStr, c)
 
-            if(found == 1):
+            if (found == 1):
                 hash = getHash(cleanStr)
 
                 index = retrieveIndex(cleanStr, hash, hTableStops)
@@ -156,45 +158,45 @@ def getTokens(input):
 
                 else:
                     foundStops[index][1] += 1
-                cleanStr=""
+                cleanStr=''
 
-        lock = Lock()
         if (cleanStr != ''):
 
-            for y in cleanStr.split():
+            y = cleanStr
+            hash = getHash(y)
+            index = retrieveIndex(y,hash, hTable)
+            local_index = retrieveIndex(y, hash, local_hTable)
 
-                hash = getHash(y)
-                index = retrieveIndex(y,hash, hTable)
-                local_index = retrieveIndex(y, hash, local_hTable)
+            if (index == -1 or local_index == -1):
 
-                if (index == -1 or local_index == -1):
-
-                    #Add to local wordlist
-                    addIndex(y, local_wordCount, hash, local_hTable)
-                    if (local_wordCount == 0):
-                        local_wordList = [[y, 1]]
-                    else:
-                        local_wordList.append([y, 1])
-                    local_wordCount += 1
-
-                    # Add to global wordlist
-                    lock.acquire()
-                    addIndex(y, wordCount, hash, hTable)
-
-                    if (wordCount == 0):
-                        wordList = [[y, 1]]
-                    else:
-                        wordList.append([y, 1])
-
-
-                    wordCount += 1
-                    lock.release()
-
+                #Add to local wordlist
+                addIndex(y, local_wordCount, hash, local_hTable)
+                if (local_wordCount == 0):
+                    local_wordList = [[y, 1]]
                 else:
-                    local_wordList[local_index][1] += 1
-                    lock.acquire()
-                    wordList[index][1] += 1
-                    lock.release()
+                    local_wordList.append([y, 1])
+                local_wordCount += 1
+
+                # Add to global wordlist
+                lock.acquire()
+                addIndex(y, wordCount, hash, hTable)
+
+                if (wordCount == 0):
+                    wordList = [[y, 1]]
+                else:
+                    wordList.append([y, 1])
+
+
+                wordCount += 1
+                lock.release()
+
+            else:
+                local_wordList[local_index][1] += 1
+                lock.acquire()
+                wordList[index][1] += 1
+                lock.release()
+
+
 
     return local_wordList
 
