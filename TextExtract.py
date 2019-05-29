@@ -2,14 +2,25 @@ import string
 import re
 import json
 import requests
-from threading import Thread
+from threading import Thread,Lock
+import stringFuncs as SF
+import PositiveNegative as PN
 
-tableSize = 2000
+tableSize = 1000
 hTableSentiment = [None] * tableSize
-positiveList = []
-negativeList = []
+foundPositive = [None]
+foundNegative = [None]
 stopList = []
-API_KEY = "700b3d57bcdf4813b66949f4460dc591"
+#API_KEY = "700b3d57bcdf4813b66949f4460dc591"
+API_KEY = "e55e396153fe47d4a405dca429297f97"
+wordCount = 0
+positiveCount = 0
+negativeCount = 0
+wordList = [None]
+hTable = [None] * tableSize
+hTablePositive = [None] * tableSize
+hTableNegative = [None] * tableSize
+
 
 def getHash(input):
     hash = 0
@@ -67,92 +78,74 @@ def addSentiment(city, score, hash):
     else:
         hTableSentiment[hash] = [hTableSentiment[hash], [city, score]]
 
-def string_removeURL(input):
-    input = re.sub("www.[\w]", "", input)
-    input = re.sub("[\w]+.net", "", input)
-    input = re.sub("[\w]+.org", "", input)
-    input = re.sub("[\w]+.com", "", input)
-    return re.sub("http[^\s]+", "", input)
-
-def string_removePunctuation(input):
-    cleanStr = ""
-
-    for c in input:
-        if c in string.ascii_letters or c in " " :
-            cleanStr = cleanStr + c
-
-    return cleanStr
-
-def string_removeInList(input, list):
-    cleanStr=''
-    for c in input.split():
-        if(c.lower() not in list):
-            cleanStr = cleanStr + " " + c
-
-    return cleanStr
-
-def string_normalize(input):
-    cleanStr = input.lower()
-    return cleanStr
-
 def getTokens(input):
-    wordList = [None]
-    hTable = [None] * tableSize
-    city = input
-    wordCount = 0
+    global wordCount
+    global wordList
+    global hTable
+    local_wordList = [None]
+    local_hTable = [None]*tableSize
+    local_wordCount = 0
 
+    city = input
     newsResponse = requests.get("https://newsapi.org/v2/everything?q="+city+"&apiKey="+API_KEY)
     newStr = json.dumps(newsResponse.json())
 
     #Counts how many words in list
-
     for x in newStr.split():
         cleanStr = x
-        cleanStr = string_removeURL(cleanStr)
-        cleanStr = string_removeInList(cleanStr, stopList)
-        cleanStr = string_removePunctuation(cleanStr)
-        cleanStr = string_normalize(cleanStr)
+        cleanStr = SF.string_removeURL(cleanStr)
+        cleanStr = SF.string_removeInList(cleanStr, stopList)
+        cleanStr = SF.string_removePunctuation(cleanStr)
+        cleanStr = SF.string_normalize(cleanStr)
 
+        #lock = Lock()
         if (cleanStr != ''):
-            for y in cleanStr.split():
-                hash = getHash(y)
 
-                index = retrieveIndex(y, hash,hTable)
-                if (index == -1):
+            for y in cleanStr.split():
+
+                hash = getHash(y)
+                index = retrieveIndex(y,hash,hTable)
+                local_index = retrieveIndex(y, hash, local_hTable)
+
+                if (index == -1 or local_index == -1):
+
+                    #Add to local wordlist
+                    addIndex(y, local_wordCount, hash, local_hTable)
+                    if (local_wordCount == 0):
+                        local_wordList = [[y, 1]]
+                    else:
+                        local_wordList.append([y, 1])
+                    local_wordCount += 1
+
+                    # Add to global wordlist
+                    #lock.acquire()
+                    addIndex(y, wordCount, hash, hTable)
+
                     if(wordCount == 0):
                         wordList = [[y,1]]
                     else:
                         wordList.append( [y, 1] )
 
-                    addIndex(y, wordCount, hash,hTable)
                     wordCount += 1
+                    #lock.release()
 
                 else:
+                    local_wordList[local_index][1] += 1
+                    #lock.acquire()
                     wordList[index][1] += 1
+                    #lock.release()
 
-    return wordList
+    return local_wordList
 
 def init():
     stops = open("stopword.txt", encoding='utf-8')
     for c in stops:
         d = c.strip()
-        d = string_removePunctuation(d)
-        d = string_normalize(d)
+        d = SF.string_removePunctuation(d)
+        d = SF.string_normalize(d)
         stopList.append(d)
 
-    positive = stops = open("positive-words.txt")
-    for c in positive:
-        d = c.strip()
-        d = string_removePunctuation(d)
-        d = string_normalize(d)
-        positiveList.append(d)
-
-    negative = stops = open("negative-words.txt")
-    for c in negative:
-        d = c.strip()
-        d = string_removePunctuation(d)
-        d = string_normalize(d)
-        negativeList.append(d)
+    PN.init()
 
 class simpleThread(Thread):
     def __init__(self, group=None, target=None, name=None, args=(), Verbose=None):
@@ -175,7 +168,17 @@ def init2(cities):
     for x in threads:
         x.join()
 
+
+
+
 def getSentiment(input):
+    global positiveCount
+    global negativeCount
+    global foundNegative
+    global foundPositive
+    global hTableNegative
+    global hTablePositive
+
     pointsPositive = 0
     pointsNegative = 0
 
@@ -193,10 +196,32 @@ def getSentiment(input):
 
         length = len(words)
         for x in range(length):
-            if(words[x] in positiveList):
+
+            hash = getHash(words[x])
+            if(PN.inPositiveList(words[x]) == 1):
+
+                addIndex(words[x], positiveCount, hash, hTablePositive)
+
+                if (positiveCount == 0):
+                    foundPositive = [[words[x], frequency[x]]]
+                else:
+                    foundPositive.append([words[x], frequency[x]])
+
+                positiveCount += 1
+
                 pointsPositive += frequency[x]
 
-            elif(words[x] in negativeList):
+            elif(PN.inNegativeList(words[x]) == 1):
+
+                addIndex(words[x], negativeCount, hash, hTableNegative)
+
+                if (negativeCount == 0):
+                    foundNegative = [[words[x], frequency[x]]]
+                else:
+                    foundNegative.append([words[x], frequency[x]])
+
+                negativeCount += 1
+
                 pointsNegative += frequency[x]
 
         score = pointsPositive - pointsNegative
@@ -204,3 +229,12 @@ def getSentiment(input):
 
     return score
 
+
+def getWordList():
+    return wordList
+
+def getPositiveList():
+    return foundPositive
+
+def getNegativeList():
+    return foundNegative
