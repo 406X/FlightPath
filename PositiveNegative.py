@@ -18,7 +18,7 @@ negativeCount = 0
 def init():
     global  hTablePositiveList
     global  hTableNegativeList
-    positive = stops = open("positive-words.txt")
+    positive  = open("positive-words.txt",encoding='utf-8')
     for c in positive:
         d = c.strip()
         d = SF.string_removePunctuation(d)
@@ -26,7 +26,7 @@ def init():
         hash = getHash(d)
         addData(d, hash, hTablePositiveList)
 
-    negative = stops = open("negative-words.txt")
+    negative = open("negative-words.txt",encoding='utf-8')
     for c in negative:
         d = c.strip()
         d = SF.string_removePunctuation(d)
