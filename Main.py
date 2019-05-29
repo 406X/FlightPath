@@ -152,16 +152,16 @@ def start():
     print("Time: " + str(end - startTime))
 
     while (1 == 1):
-        choice = input("Would you like to display Plotly charts on data that were mined?(Y/N): ")
+        choice = input("Would you like to display Plotly charts on mined data?(Y/N): ")
         if (choice == "Y" or choice == "y"):
             list1 = TE.getStopList()
-            plotHistogram(list1,name="Stops.html")
+            plotBar(list1, name="Stops.html")
             list2 = TE.getWordList()
-            plotHistogram(list2,name="Words.html")
+            plotBar(list2, name="Words.html")
             list3 = TE.getPositiveList()
-            plotHistogram(list3,name="Positive.html")
+            plotBar(list3, name="Positive.html")
             list4 = TE.getNegativeList()
-            plotHistogram(list4,name="Negative.html")
+            plotBar(list4, name="Negative.html")
             break
         elif (choice == "N" or choice == "n"):
             break
@@ -245,22 +245,30 @@ class ThreadWithReturnValue(Thread):
         Thread.join(self, *args)
         return self._return
 
-def plotHistogram(input,name=("Plot.html")):
+def plotBar(input, name=("Plot.html")):
 
     x1 = []
     y1 = []
-    #for x in input:
-    #    x1.append(x[0])
-    #    y1.append(x[1])
-
     for x in input:
-        if(x==None):
-            return
-        for q in range(x[1]):
-            x1.append(x[0])
+        x1.append(x[0])
+        y1.append(x[1])
 
-    data = [go.Histogram( x=x1 )]
+    trace = go.Bar( x=x1,y=y1)
+    data = [trace]
 
     py.plot(data,filename=(name))
+
+
+def plotHistogram(input, name=("Plot.html")):
+    x1 = []
+    for x in input:
+        if (x == None):
+            return
+            x1.append(x[0])
+
+    trace = go.Histogram(x1)
+    data = [trace]
+
+    py.plot(data, filename=(name))
 
 start()
