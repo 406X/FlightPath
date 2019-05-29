@@ -156,7 +156,7 @@ def getTokens(input):
 
                 else:
                     foundStops[index][1] += 1
-                x=""
+                cleanStr=""
 
         lock = Lock()
         if (cleanStr != ''):
