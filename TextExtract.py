@@ -34,7 +34,7 @@ def getHash(input):
 
     return hash
 
-def retrieveIndex(word, hash,hTable):
+def retrieveIndex(word, hash, hTable):
     if(hTable[hash] == None):
         return -1
     elif( type( hTable[hash][0] ) == list):
@@ -48,18 +48,14 @@ def retrieveIndex(word, hash,hTable):
     return -1
 
 def retrieveSentiment(city, hash):
-
     if(hTableSentiment[hash] == None):
         return -1
     elif( type( hTableSentiment[hash][0] ) == list):
         for x in hTableSentiment[hash]:
             if(x[0] == city):
                 return x[1]
-            elif(x[0] == city):
-                return x[1]
     elif(hTableSentiment[hash][0] == city):
             return hTableSentiment[hash][1]
-    return -1
 
 def addIndex(word, index, hash,hTable):
     if( hTable[hash] == None ):
@@ -104,7 +100,7 @@ def getTokens(input):
             for y in cleanStr.split():
 
                 hash = getHash(y)
-                index = retrieveIndex(y,hash,hTable)
+                index = retrieveIndex(y,hash, hTable)
                 local_index = retrieveIndex(y, hash, local_hTable)
 
                 if (index == -1 or local_index == -1):
@@ -178,6 +174,7 @@ def getSentiment(input):
     global foundPositive
     global hTableNegative
     global hTablePositive
+    global hTableSentiment
 
     pointsPositive = 0
     pointsNegative = 0
@@ -197,10 +194,10 @@ def getSentiment(input):
         length = len(words)
         for x in range(length):
 
-            hash = getHash(words[x])
+            hash2 = getHash(words[x])
             if(PN.inPositiveList(words[x]) == 1):
 
-                addIndex(words[x], positiveCount, hash, hTablePositive)
+                addIndex(words[x], positiveCount, hash2, hTablePositive)
 
                 if (positiveCount == 0):
                     foundPositive = [[words[x], frequency[x]]]
@@ -212,8 +209,7 @@ def getSentiment(input):
                 pointsPositive += frequency[x]
 
             elif(PN.inNegativeList(words[x]) == 1):
-
-                addIndex(words[x], negativeCount, hash, hTableNegative)
+                addIndex(words[x], negativeCount, hash2, hTableNegative)
 
                 if (negativeCount == 0):
                     foundNegative = [[words[x], frequency[x]]]
@@ -225,6 +221,7 @@ def getSentiment(input):
                 pointsNegative += frequency[x]
 
         score = pointsPositive - pointsNegative
+
         addSentiment(input,score,hash)
 
     return score
