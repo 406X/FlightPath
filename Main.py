@@ -7,11 +7,14 @@ from mako.template import Template
 import time
 import threading
 from threading import Thread
+import plotly.offline as py
+import plotly.graph_objs as go
 
-cities = { "Beijing","Dubai","Los Angeles","Tokyo","London","Hong Kong","Amsterdam","Incheon","Istanbul","Singapore","Argentina","Delhi","Madrid","Kuala Lumpur"}
+cities = { "Beijing","Dubai","Los Angeles","Tokyo","London","Hong Kong","Amsterdam","Incheon","Istanbul","Singapore","Argentina","Delhi","Madrid","Kuala Lumpur","Bangkok","Ho Chi Minh City",}
 
 #Yes don't steal this >.>
 API_KEY = "AIzaSyAn27el7Uuj1qLQvpZgF9fbVjGLu_HPhbQ"
+plotlykey ="dtu6qHyNFsVF1wQSWWhS"
 # Google Cloud API Key
 # This program uses the following Google Cloud APIs
 # - Geocoding API
@@ -92,6 +95,7 @@ def start():
 
     numRoutes = int(num2)
 
+    print("Generating route...")
     startTime = time.time()
 
     # Init
@@ -104,9 +108,10 @@ def start():
     t.start()
 
     routes = RT.getAllRoutes(source, dest)
-    Thread2 = []
-
     t.join()
+
+
+    Thread2 = []
     for x in routes:
         t = thread_Thread(x)
         t.start()
@@ -114,6 +119,24 @@ def start():
 
     for r in Thread2:
         r.join()
+
+    while (1 == 1):
+        choice = input("Would you like to display Plotly charts on data that were mined?(Y/N): ")
+        if (choice == "Y" or choice == "y"):
+            list1 = TE.getStopList()
+            plotHistogram(list1,name="Stops.html")
+            list2 = TE.getWordList()
+            plotHistogram(list2,name="Words.html")
+            list3 = TE.getPositiveList()
+            plotHistogram(list3,name="Positive.html")
+            list4 = TE.getNegativeList()
+            plotHistogram(list4,name="Negative.html")
+            break
+        elif (choice == "N" or choice == "n"):
+            break
+        else:
+            print("Invalid Option")
+            continue
 
     length = len(routes[0]) - 2
     routes = RT.quickSort(routes, 0, len(routes) - 1, val=length)
@@ -164,7 +187,7 @@ def start():
 
         choice = 'Y'
         while (1 == 1):
-            choice = input("Do you want to diplay another route?(Y/N): ")
+            choice = input("Do you want to display another route?(Y/N): ")
             if (choice == "Y" or choice == "y"):
                 break
             elif (choice == "N" or choice == "n"):
@@ -177,7 +200,8 @@ def start():
         if (choice == "N" or choice == "n"):
             break
 
-print("Generating route...")
+
+
 
 class thread_Thread(threading.Thread):
     def __init__(self, x):
@@ -191,16 +215,52 @@ class thread_Thread(threading.Thread):
         for y in range(length):
             if (type(self.x[y]) == float):
                 continue
-            score = TE.getSentiment(self.x[y])
-            if(score>10):
+            t = ThreadWithReturnValue(target=TE.getSentiment,args=self.x[y])
+            t.start()
+            Thread3.append(t)
+
+        for x in Thread3:
+            score = x.join()
+            if (score > 10):
                 score = 10
-            if(score<-10):
-                score=-10
+            if (score < -10):
+                score = -10
             totalSentimentScore += score
+
         self.x.append(totalSentimentScore)
 
-    def join(self):
-        Thread.join(self)
+def join(self):
+    Thread.join(self)
 
+class ThreadWithReturnValue(Thread):
+    def __init__(self, group=None, target=None, name=None, args=(), Verbose=None):
+        Thread.__init__(self, group, target, name, args)
+        self._return = None
+
+    def run(self):
+        if self._target is not None:
+            self._return = self._target(self._args)
+
+    def join(self, *args):
+        Thread.join(self, *args)
+        return self._return
+
+def plotHistogram(input,name=("Plot.html")):
+
+    x1 = []
+    y1 = []
+    #for x in input:
+    #    x1.append(x[0])
+    #    y1.append(x[1])
+
+    for x in input:
+        if(x==None):
+            return
+        for q in range(x[1]):
+            x1.append(x[0])
+
+    data = [go.Histogram( x=x1 )]
+
+    py.plot(data,filename=(name))
 
 start()
