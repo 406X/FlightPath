@@ -49,7 +49,7 @@ def start():
     numTransits = 3
     numRoutes = 3
     source = "Kuala Lumpur"
-    dest = "Dubai"
+    dest = "dasdsa"
     list = cities.copy()
     print("Source: "+ source)
     #print("Enter a starting location:")
@@ -59,17 +59,38 @@ def start():
     #source = input("Input: ")
     list.remove(source)
 
-    print("Enter destination location:")
-    print("Available options:")
-    for c in list:
-        print(" -" + c)
-    dest = input("Input: ")
+    while(dest not in cities):
+        print("Enter destination location:")
+        print("Available options:")
+        for c in list:
+            print(" -" + c)
+
+        dest = input("Input: ")
+        if(dest not in cities):
+            print("Invalid Input")
+            continue
+
     list.remove(dest)
-    num = input("Number of transits to make (1-5) : ")
+
+
+    limit = 5
+    num = -1
+    while(int(num)<=0 or int(num) >limit):
+        num = input("Number of transits to make (1-" + str(limit) + ") : ")
+
+        if(int(num)<=0 or int(num) >limit):
+            print("Invalid Input")
+
     numTransits = int(num)
 
-    num = input("How many routes do you want? : ")
-    numRoutes = int(num)
+    num2 = -1
+    while(int(num2)<=0):
+        num2 = input("How many routes do you want? : ")
+
+        if(int(num2)<=0):
+            print("Value cannot be less than 1")
+
+    numRoutes = int(num2)
 
     startTime = time.time()
 
