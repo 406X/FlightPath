@@ -11,16 +11,18 @@ hTableSentiment = [None] * tableSize
 foundPositive = [None]
 foundNegative = [None]
 stopList = []
-#API_KEY = "700b3d57bcdf4813b66949f4460dc591"
-API_KEY = "e55e396153fe47d4a405dca429297f97"
+foundStops = [None]
+API_KEY = "700b3d57bcdf4813b66949f4460dc591"
+#API_KEY = "e55e396153fe47d4a405dca429297f97"
 wordCount = 0
+stopCount = 0
 positiveCount = 0
 negativeCount = 0
 wordList = [None]
 hTable = [None] * tableSize
 hTablePositive = [None] * tableSize
 hTableNegative = [None] * tableSize
-
+hTableStops = [None] * tableSize
 
 def getHash(input):
     hash = 0
@@ -78,6 +80,9 @@ def getTokens(input):
     global wordCount
     global wordList
     global hTable
+    global hTableStops
+    global foundStops
+    global stopCount
     local_wordList = [None]
     local_hTable = [None]*tableSize
     local_wordCount = 0
@@ -87,14 +92,35 @@ def getTokens(input):
     newStr = json.dumps(newsResponse.json())
 
     #Counts how many words in list
+    lock = Lock()
     for x in newStr.split():
         cleanStr = x
         cleanStr = SF.string_removeURL(cleanStr)
-        cleanStr = SF.string_removeInList(cleanStr, stopList)
+
+        for c in cleanStr.split():
+            if (c.lower() not in stopList):
+                cleanStr = cleanStr + " " + c
+            else:
+                cc = c.lower()
+                hash = getHash(cc)
+
+                index = retrieveIndex(cc, hash, hTableStops)
+                if (index == -1):
+                    addIndex(cc, stopCount, hash, hTableStops)
+                    if (stopCount == 0):
+                        foundStops = [[cc, 1]]
+                    else:
+                        foundStops.append([cc, 1])
+                    stopCount += 1
+
+                else:
+                    foundStops[index][1] += 1
+
+
         cleanStr = SF.string_removePunctuation(cleanStr)
         cleanStr = SF.string_normalize(cleanStr)
 
-        #lock = Lock()
+        lock = Lock()
         if (cleanStr != ''):
 
             for y in cleanStr.split():
@@ -114,22 +140,23 @@ def getTokens(input):
                     local_wordCount += 1
 
                     # Add to global wordlist
-                    #lock.acquire()
+                    lock.acquire()
                     addIndex(y, wordCount, hash, hTable)
 
-                    if(wordCount == 0):
-                        wordList = [[y,1]]
+                    if (wordCount == 0):
+                        wordList = [[y, 1]]
                     else:
-                        wordList.append( [y, 1] )
+                        wordList.append([y, 1])
+
 
                     wordCount += 1
-                    #lock.release()
+                    lock.release()
 
                 else:
                     local_wordList[local_index][1] += 1
-                    #lock.acquire()
+                    lock.acquire()
                     wordList[index][1] += 1
-                    #lock.release()
+                    lock.release()
 
     return local_wordList
 
@@ -235,3 +262,6 @@ def getPositiveList():
 
 def getNegativeList():
     return foundNegative
+
+def getStopList():
+    return foundStops
