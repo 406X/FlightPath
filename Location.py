@@ -18,15 +18,11 @@ hTable_Coords = [None] * tableSize
 #hTable_Coords[hash][0] = location name
 #hTable_Coords[hash][1] = location coords; e.g "[[84.23124],[23,52321]]
 
-hTable_request = [None] * tableSize
-#Not yet implemented
-
 API_KEY = ""
 
 def getDistance(source, dest):
     hash = getHash(source, dest)
     dist = retrieveDist(source,dest,hash)
-
     if( dist == -1):
 
         t1 = thread_getCoords(source)
@@ -43,8 +39,7 @@ def getDistance(source, dest):
 
         distance = geopy.distance.vincenty(str_coords_source, str_coords_dest).km
 
-        if(retrieveDist(source,dest,hash)==-1):
-            addDist(source, dest, distance, hash)
+        addDist(source, dest, distance, hash)
 
         dist = distance
 
@@ -128,6 +123,7 @@ def retrieveCoords(location, hash):
     return -1
 
 def addDist(source,dest,distance,hash):
+    global  hTable_Dist
     if( hTable_Dist[hash] == None ):
         hTable_Dist[hash] = [source, dest, distance]
     elif ( type(hTable_Dist[hash][0]) == list):
@@ -136,28 +132,13 @@ def addDist(source,dest,distance,hash):
         hTable_Dist[hash] = [hTable_Dist[hash], [source, dest, distance]]
 
 def addCoords(location,coords,hash):
-    if( hTable_Dist[hash] == None ):
-        hTable_Dist[hash] = [location, coords]
-    elif ( type(hTable_Dist[hash][0]) == list):
-        hTable_Dist[hash].append( [location, coords])
+    global hTable_Coords
+    if( hTable_Coords[hash] == None ):
+        hTable_Coords[hash] = [location, coords]
+    elif ( type(hTable_Coords[hash][0]) == list):
+        hTable_Coords[hash].append( [location, coords])
     else:
-        hTable_Dist[hash] = [hTable_Dist[hash],  [location, coords]]
-
-def addRequest(source,dest,hash):
-    if( hTable_request[hash] == None ):
-        hTable_request[hash] = [source, dest]
-    elif ( type(hTable_request[hash][0]) == list):
-        hTable_request[hash].append([source,dest])
-    else:
-        hTable_request[hash] = [hTable_request[hash], [source, dest]]
-
-def removeRequest(source,dest,hash):
-    if( hTable_request[hash] == None ):
-        hTable_request[hash] = [source, dest]
-    elif ( type(hTable_request[hash][0]) == list):
-        hTable_request[hash].append([source,dest])
-    else:
-        hTable_request[hash] = [hTable_request[hash], [source, dest]]
+        hTable_Coords[hash] = [hTable_Coords[hash],  [location, coords]]
 
 def getTable():
     return hTable_Dist
