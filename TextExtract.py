@@ -1,5 +1,3 @@
-import string
-import re
 import json
 import requests
 from threading import Thread,Lock
@@ -14,6 +12,7 @@ stopList = []
 foundStops = [None]
 #API_KEY = "700b3d57bcdf4813b66949f4460dc591"
 API_KEY = "e55e396153fe47d4a405dca429297f97"
+#API_KEY = "6f1f74565b754b70a1c55f33310e6378"
 wordCount = 0
 stopCount = 0
 positiveCount = 0
@@ -51,7 +50,7 @@ def retrieveIndex(word, hash, hTable):
 
 def retrieveSentiment(city, hash):
     if(hTableSentiment[hash] == None):
-        return -1
+        return None
     elif( type( hTableSentiment[hash][0] ) == list):
         for x in hTableSentiment[hash]:
             if(x[0] == city):
@@ -232,8 +231,6 @@ def init2(cities):
         x.join()
 
 
-
-
 def getSentiment(input):
     global positiveCount
     global negativeCount
@@ -248,7 +245,7 @@ def getSentiment(input):
 
     hash = getHash(input)
     score = retrieveSentiment(input, hash)
-    if (score != -1):
+    if (score != None):
         return score
     else:
         tokens = getTokens(input)
